@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowUpRight, Menu, Clock, Play, CheckCircle2, Star, TrendingUp, Users, DollarSign, GraduationCap, Video, Package } from "lucide-react";
+import { ArrowUpRight, Menu, Clock, CheckCircle2, Star, TrendingUp, Users, DollarSign, GraduationCap, Video, Package } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -19,7 +19,7 @@ import { Logo } from "@/components/Logo";
 interface ModuleCardProps {
   icon: React.ElementType;
   title: string;
-  duration: string;
+  duration?: string;
   lessons: number;
 }
 
@@ -35,13 +35,15 @@ const ModuleCard: React.FC<ModuleCardProps> = ({ icon: Icon, title, duration, le
       <div className="flex-1">
         <h4 className="font-semibold text-foreground mb-1">{title}</h4>
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <Clock className="w-3 h-3" />
-            {duration}
-          </span>
+          {duration && (
+            <span className="flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              {duration}
+            </span>
+          )}
           <span className="flex items-center gap-1">
             <Video className="w-3 h-3" />
-            {lessons} lessons
+            {lessons} {lessons === 1 ? "video" : "videos"}
           </span>
         </div>
       </div>
@@ -58,10 +60,12 @@ const navigation = [
 ];
 
 const modules = [
-  { icon: GraduationCap, title: "Introduction to Dropshipping", duration: "2h 30m", lessons: 8 },
-  { icon: Package, title: "Finding Winning Products", duration: "3h 15m", lessons: 12 },
-  { icon: TrendingUp, title: "Marketing & Advertising", duration: "4h 00m", lessons: 15 },
-  { icon: DollarSign, title: "Scaling Your Business", duration: "2h 45m", lessons: 10 },
+  { icon: GraduationCap, title: "Chapter 1", lessons: 7 },
+  { icon: Package, title: "Chapter 2", lessons: 7 },
+  { icon: TrendingUp, title: "Chapter 3", lessons: 18 },
+  { icon: DollarSign, title: "Chapter 4", lessons: 2 },
+  { icon: Users, title: "Chapter 5", lessons: 12 },
+  { icon: Star, title: "Chapter 6", lessons: 4 },
 ];
 
 const features = [
@@ -115,9 +119,23 @@ export default function Home() {
     window.open(enrollUrl, '_blank', 'noopener,noreferrer');
   };
 
-  const handleVideoPlay = () => {
-    alert('Video preview coming soon!');
-  };
+  const carouselImages = React.useMemo(
+    () => [
+      { src: "/image1.png", alt: "Product research dashboard preview" },
+      { src: "/image2.png", alt: "Advertising campaign performance" },
+      { src: "/dashboard_image3.png", alt: "Dropshipping sales overview" },
+    ],
+    []
+  );
+  const [currentImageIndex, setCurrentImageIndex] = React.useState(0);
+
+  React.useEffect(() => {
+    const interval = window.setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % carouselImages.length);
+    }, 3500);
+
+    return () => window.clearInterval(interval);
+  }, [carouselImages.length]);
 
   return (
     <div className="w-full min-h-screen bg-background">
@@ -295,7 +313,7 @@ export default function Home() {
           </span>
         </motion.h2>
         <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
-          12+ hours of content • 45 lessons • Lifetime access
+          5h 25m of video • 50 lessons • Lifetime access
         </p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto mb-20">
@@ -317,21 +335,33 @@ export default function Home() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 1.3 }}
         >
-          <button
-            onClick={handleVideoPlay}
-            className="relative rounded-2xl overflow-hidden bg-accent/50 aspect-video flex items-center justify-center group cursor-pointer w-full"
-          >
-            <img
-              src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=450&fit=crop"
-              alt="Course preview"
-              className="absolute inset-0 w-full h-full object-cover opacity-50"
-            />
-            <div className="relative z-10">
-              <div className="w-20 h-20 rounded-full bg-primary/90 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                <Play className="w-8 h-8 text-primary-foreground ml-1" fill="currentColor" />
-              </div>
+          <div className="relative rounded-2xl overflow-hidden bg-accent/50 aspect-video flex items-center justify-center w-full">
+            {carouselImages.map((image, index) => (
+              <motion.img
+                key={image.src}
+                src={image.src}
+                alt={image.alt}
+                className="absolute inset-0 w-full h-full object-cover"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: currentImageIndex === index ? 1 : 0 }}
+                transition={{ duration: 0.8, ease: "easeInOut" }}
+                aria-hidden={currentImageIndex !== index}
+              />
+            ))}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+              {carouselImages.map((_, index) => (
+                <span
+                  key={index}
+                  className={cn(
+                    "h-2 w-2 rounded-full transition-all duration-300",
+                    currentImageIndex === index
+                      ? "bg-primary w-6"
+                      : "bg-primary/40"
+                  )}
+                />
+              ))}
             </div>
-          </button>
+          </div>
 
           <div className="flex flex-col justify-center">
             <h3 className="text-2xl font-bold mb-4">What You'll Get</h3>
